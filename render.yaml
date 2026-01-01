@@ -1,0 +1,8 @@
+services:
+  - type: static_site
+    name: hop-dong-dien-tu
+    repo: https://github.com/truongnguyena/hop-dong-dien-tu.git
+    branch: main
+    # Render sometimes requires a non-empty buildCommand in the UI. Use a no-op to satisfy the form.
+    buildCommand: "echo 'no build'"
+    publishPath: /
