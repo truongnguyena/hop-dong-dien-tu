@@ -96,35 +96,73 @@ const initKeyboardShortcuts = () => {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
       e.preventDefault();
       if (confirm('Tạo bản nháp mới? Dữ liệu hiện tại sẽ bị xóa.')) {
-        // First unlock form to allow reset
-        unlockForm();
-        
-        // Get form reference
-        const form = document.getElementById('contractBuilder');
-        const preview = document.getElementById('contractPreview');
-        const emptyState = document.getElementById('contractTemplate')?.innerHTML || '';
-        
-        // Now reset the form
-        if (form) form.reset();
-        if (preview) preview.innerHTML = emptyState;
-        signatureAImage = null;
-        signatureBImage = null;
-        
-        // Clear signature canvases
-        const canvasA = document.getElementById('signatureCanvasA');
-        const canvasB = document.getElementById('signatureCanvasB');
-        if (canvasA) {
-          canvasA.style.pointerEvents = 'auto';
-          canvasA.getContext('2d').clearRect(0, 0, canvasA.width, canvasA.height);
+        try {
+          // First unlock form to allow reset
+          unlockForm();
+          
+          // Get fresh references
+          const formEl = document.getElementById('contractBuilder');
+          const previewEl = document.getElementById('contractPreview');
+          const templateEl = document.getElementById('contractTemplate');
+          
+          // Reset form
+          if (formEl) {
+            // Clear all inputs manually to ensure they are cleared
+            const inputs = formEl.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+              if (input.type === 'checkbox' || input.type === 'radio') {
+                input.checked = false;
+              } else {
+                input.value = '';
+              }
+            });
+          }
+          
+          // Reset preview
+          if (previewEl && templateEl) {
+            previewEl.innerHTML = templateEl.innerHTML;
+          }
+          
+          // Reset signatures (these are global variables)
+          signatureAImage = null;
+          signatureBImage = null;
+          
+          // Clear signature canvases
+          const canvasA = document.getElementById('signatureCanvasA');
+          const canvasB = document.getElementById('signatureCanvasB');
+          if (canvasA) {
+            canvasA.style.pointerEvents = 'auto';
+            const ctxA = canvasA.getContext('2d');
+            ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
+            ctxA.strokeStyle = '#1d1f2c';
+            ctxA.lineWidth = 2;
+            ctxA.lineCap = 'round';
+            ctxA.lineJoin = 'round';
+          }
+          if (canvasB) {
+            canvasB.style.pointerEvents = 'auto';
+            const ctxB = canvasB.getContext('2d');
+            ctxB.clearRect(0, 0, canvasB.width, canvasB.height);
+            ctxB.strokeStyle = '#1d1f2c';
+            ctxB.lineWidth = 2;
+            ctxB.lineCap = 'round';
+            ctxB.lineJoin = 'round';
+          }
+          
+          // Clear localStorage
+          localStorage.removeItem('eCurrentContractId');
+          
+          // Update UI if functions exist
+          try {
+            updateProgress();
+            showNotification('Đã tạo bản nháp mới', 'success', 1500);
+          } catch (err) {
+            console.log('UI update skipped:', err.message);
+          }
+        } catch (err) {
+          console.error('Error creating new draft:', err);
+          showNotification('Lỗi: ' + err.message, 'error');
         }
-        if (canvasB) {
-          canvasB.style.pointerEvents = 'auto';
-          canvasB.getContext('2d').clearRect(0, 0, canvasB.width, canvasB.height);
-        }
-        
-        updateProgress();
-        localStorage.removeItem(currentContractKey);
-        showNotification('Đã tạo bản nháp mới', 'success', 1500);
       }
     }
     // Ctrl+,: Settings
