@@ -1,8 +1,10 @@
 services:
   - type: static_site
     name: hop-dong-dien-tu
-    repo: https://github.com/truongnguyena/hop-dong-dien-tu.git
+    # Use owner/repo format to avoid URL parsing issues during import
+    repo: truongnguyena/hop-dong-dien-tu
     branch: main
     # Render sometimes requires a non-empty buildCommand in the UI. Use a no-op to satisfy the form.
     buildCommand: "echo 'no build'"
-    publishPath: /
+    # Publish path should be a string; use "." to indicate repository root
+    publishPath: "."
