@@ -92,10 +92,23 @@ const initKeyboardShortcuts = () => {
       e.preventDefault();
       loadDraft();
     }
-    // Ctrl+Shift+D: Dark Mode
+    // Ctrl+Shift+D: New Draft (Reset Form)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
       e.preventDefault();
-      toggleDarkMode();
+      if (confirm('Tạo bản nháp mới? Dữ liệu hiện tại sẽ bị xóa.')) {
+        form.reset();
+        preview.innerHTML = emptyState;
+        signatureAImage = null;
+        signatureBImage = null;
+        // Clear signature canvases
+        const canvasA = document.getElementById('signatureCanvasA');
+        const canvasB = document.getElementById('signatureCanvasB');
+        if (canvasA) canvasA.getContext('2d').clearRect(0, 0, canvasA.width, canvasA.height);
+        if (canvasB) canvasB.getContext('2d').clearRect(0, 0, canvasB.width, canvasB.height);
+        updateProgress();
+        localStorage.removeItem(currentContractKey);
+        showNotification('Đã tạo bản nháp mới', 'success', 1500);
+      }
     }
     // Ctrl+,: Settings
     if ((e.ctrlKey || e.metaKey) && e.key === ',') {
