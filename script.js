@@ -2026,7 +2026,10 @@ const setupPresetHandlers = () => {
 };
 
 // Khởi tạo khi DOM đã load
-document.addEventListener('DOMContentLoaded', () => {
+export function init() {
+  // Basic UI and feature init
+  initDarkMode();
+  initKeyboardShortcuts();
   setTodayDate();
   if (preview) preview.innerHTML = emptyState;
   updateProgress();
@@ -2035,51 +2038,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPresetHandlers();
   handleRemoteSigning();
   checkPermissions(); // Kiểm tra quyền khi load trang
-  // Nếu có contract hiện tại và đã ký thì khoá giao diện
-  const currentId = localStorage.getItem(currentContractKey);
-  if (currentId) {
-    const c = contracts.find(x => x.id === currentId);
-    if (isContractSigned(c)) {
-      // restore signatures to canvases if present
-      if (c.signatureA) {
-        signatureAImage = c.signatureA;
-        const canvasA = document.getElementById('signatureCanvasA');
-        if (canvasA) {
-          const ctxA = canvasA.getContext('2d');
-          const img = new Image();
-          img.onload = () => ctxA.drawImage(img, 0, 0, canvasA.width, canvasA.height);
-          img.src = c.signatureA;
-        }
-      }
-      if (c.signatureB) {
-        signatureBImage = c.signatureB;
-        const canvasB = document.getElementById('signatureCanvasB');
-        if (canvasB) {
-          const ctxB = canvasB.getContext('2d');
-          const img = new Image();
-          img.onload = () => ctxB.drawImage(img, 0, 0, canvasB.width, canvasB.height);
-          img.src = c.signatureB;
-        }
-      }
-      lockForm(currentId);
-    }
-  }
-});
 
-// Cũng khởi tạo ngay nếu DOM đã sẵn sàng
-if (document.readyState === 'loading') {
-  // DOM chưa load xong, đã có event listener ở trên
-} else {
-  // DOM đã load xong
-  setTodayDate();
-  if (preview) preview.innerHTML = emptyState;
-  updateProgress();
-  setupSignatureCanvas('signatureCanvasA', 'clearSignatureA');
-  setupSignatureCanvas('signatureCanvasB', 'clearSignatureB');
-  setupPresetHandlers();
-  handleRemoteSigning();
-  checkPermissions(); // Kiểm tra quyền khi load trang
-  // Nếu có contract hiện tại và đã ký thì khoá giao diện
+  // Auto-save event listeners
+  form?.addEventListener('input', scheduleAutoSave);
+  form?.addEventListener('change', scheduleAutoSave);
+
+  // Restore current contract signatures and lock form if signed
   const currentId = localStorage.getItem(currentContractKey);
   if (currentId) {
     const c = contracts.find(x => x.id === currentId);
@@ -2108,6 +2072,16 @@ if (document.readyState === 'loading') {
     }
   }
 }
+
+document.addEventListener('DOMContentLoaded', init);
+
+// Cũng khởi tạo ngay nếu DOM đã sẵn sàng
+if (document.readyState === 'loading') {
+  // DOM chưa load xong, đã có event listener ở trên
+} else {
+  // DOM đã load xong
+  init();
+} 
 
 // ============================================================
 // SETTINGS & UI HANDLERS
@@ -2168,56 +2142,11 @@ document.getElementById('clearDataBtn')?.addEventListener('click', () => {
 });
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  initDarkMode();
-  initKeyboardShortcuts();
-  setTodayDate();
-  if (preview) preview.innerHTML = emptyState;
-  updateProgress();
-  setupSignatureCanvas('signatureCanvasA', 'clearSignatureA');
-  setupSignatureCanvas('signatureCanvasB', 'clearSignatureB');
-  setupPresetHandlers();
-  handleRemoteSigning();
-  checkPermissions();
-  
-  // Auto-save event listeners
-  form?.addEventListener('input', scheduleAutoSave);
-  form?.addEventListener('change', scheduleAutoSave);
-  
-  // Current contract check
-  const currentId = localStorage.getItem(currentContractKey);
-  if (currentId) {
-    const c = contracts.find(x => x.id === currentId);
-    if (isContractSigned(c)) {
-      if (c.signatureA) {
-        signatureAImage = c.signatureA;
-        const canvasA = document.getElementById('signatureCanvasA');
-        if (canvasA) {
-          const ctxA = canvasA.getContext('2d');
-          const img = new Image();
-          img.onload = () => ctxA.drawImage(img, 0, 0, canvasA.width, canvasA.height);
-          img.src = c.signatureA;
-        }
-      }
-      if (c.signatureB) {
-        signatureBImage = c.signatureB;
-        const canvasB = document.getElementById('signatureCanvasB');
-        if (canvasB) {
-          const ctxB = canvasB.getContext('2d');
-          const img = new Image();
-          img.onload = () => ctxB.drawImage(img, 0, 0, canvasB.width, canvasB.height);
-          img.src = c.signatureB;
-        }
-      }
-      lockForm(currentId);
-    }
-  }
-});
+document.addEventListener('DOMContentLoaded', init);
 
 if (document.readyState === 'loading') {
   // DOM chưa load xong
 } else {
   // DOM đã load xong
-  initDarkMode();
-  initKeyboardShortcuts();
+  init();
 }
