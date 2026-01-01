@@ -105,6 +105,8 @@ const initKeyboardShortcuts = () => {
         const canvasB = document.getElementById('signatureCanvasB');
         if (canvasA) canvasA.getContext('2d').clearRect(0, 0, canvasA.width, canvasA.height);
         if (canvasB) canvasB.getContext('2d').clearRect(0, 0, canvasB.width, canvasB.height);
+        // Unlock form if it was locked
+        unlockForm();
         updateProgress();
         localStorage.removeItem(currentContractKey);
         showNotification('Đã tạo bản nháp mới', 'success', 1500);
@@ -365,13 +367,9 @@ const saveContractFromForm = (contractId) => {
 
 // Lock form UI to prevent further edits after signing
 const lockForm = (contractId) => {
-  // Disable all inputs/selects/textarea/buttons (except export and view actions)
-  const elements = form.querySelectorAll('input, select, textarea, button');
-  elements.forEach(el => {
-    // Keep export/download/manage buttons enabled
-    if (el.id === 'exportPdfBtn' || el.id === 'exportJsonBtn' || el.id === 'manageContractsBtn') return;
-    // Keep copy and generate link allowed
-    if (el.id === 'copyContractBtn' || el.id === 'generateLinkBtn') return;
+  // Disable only input fields (input, select, textarea), NOT buttons
+  const inputElements = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+  inputElements.forEach(el => {
     el.disabled = true;
   });
 
@@ -426,6 +424,33 @@ const lockForm = (contractId) => {
       preview.parentElement.appendChild(watermark);
     }
   }
+};
+
+// Unlock form (reverse of lockForm)
+const unlockForm = () => {
+  // Enable all inputs/selects/textarea in the form
+  const elements = form.querySelectorAll('input, select, textarea');
+  elements.forEach(el => {
+    el.disabled = false;
+  });
+
+  // Make canvases interactive again and show clear buttons
+  ['signatureCanvasA','signatureCanvasB'].forEach(id => {
+    const c = document.getElementById(id);
+    if (c) c.style.pointerEvents = 'auto';
+  });
+  ['clearSignatureA','clearSignatureB'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.style.display = 'inline-block';
+  });
+
+  // Remove locked notice
+  const notice = document.getElementById('contractLockedNotice');
+  if (notice) notice.remove();
+
+  // Remove watermark
+  const watermark = document.getElementById('previewWatermark');
+  if (watermark) watermark.remove();
 };
 
 // If loading a contract object, check if signed
