@@ -97,68 +97,8 @@ const initKeyboardShortcuts = () => {
       e.preventDefault();
       if (confirm('Tạo bản nháp mới? Dữ liệu hiện tại sẽ bị xóa.')) {
         try {
-          // First unlock form to allow reset
-          unlockForm();
-          
-          // Get fresh references
-          const formEl = document.getElementById('contractBuilder');
-          const previewEl = document.getElementById('contractPreview');
-          const templateEl = document.getElementById('contractTemplate');
-          
-          // Reset form
-          if (formEl) {
-            // Clear all inputs manually to ensure they are cleared
-            const inputs = formEl.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-              if (input.type === 'checkbox' || input.type === 'radio') {
-                input.checked = false;
-              } else {
-                input.value = '';
-              }
-            });
-          }
-          
-          // Reset preview
-          if (previewEl && templateEl) {
-            previewEl.innerHTML = templateEl.innerHTML;
-          }
-          
-          // Reset signatures (these are global variables)
-          signatureAImage = null;
-          signatureBImage = null;
-          
-          // Clear signature canvases
-          const canvasA = document.getElementById('signatureCanvasA');
-          const canvasB = document.getElementById('signatureCanvasB');
-          if (canvasA) {
-            canvasA.style.pointerEvents = 'auto';
-            const ctxA = canvasA.getContext('2d');
-            ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
-            ctxA.strokeStyle = '#1d1f2c';
-            ctxA.lineWidth = 2;
-            ctxA.lineCap = 'round';
-            ctxA.lineJoin = 'round';
-          }
-          if (canvasB) {
-            canvasB.style.pointerEvents = 'auto';
-            const ctxB = canvasB.getContext('2d');
-            ctxB.clearRect(0, 0, canvasB.width, canvasB.height);
-            ctxB.strokeStyle = '#1d1f2c';
-            ctxB.lineWidth = 2;
-            ctxB.lineCap = 'round';
-            ctxB.lineJoin = 'round';
-          }
-          
-          // Clear localStorage
-          localStorage.removeItem('eCurrentContractId');
-          
-          // Update UI if functions exist
-          try {
-            updateProgress();
-            showNotification('Đã tạo bản nháp mới', 'success', 1500);
-          } catch (err) {
-            console.log('UI update skipped:', err.message);
-          }
+          resetFormCompletely();
+          showNotification('Đã tạo bản nháp mới', 'success', 1500);
         } catch (err) {
           console.error('Error creating new draft:', err);
           showNotification('Lỗi: ' + err.message, 'error');
@@ -480,6 +420,79 @@ const lockForm = (contractId) => {
       preview.parentElement.style.position = 'relative';
       preview.parentElement.appendChild(watermark);
     }
+  }
+};
+
+// Reset entire form to empty state
+const resetFormCompletely = () => {
+  try {
+    // Unlock form first
+    unlockForm();
+    
+    // Get references
+    const formEl = document.getElementById('contractBuilder');
+    const previewEl = document.getElementById('contractPreview');
+    const templateEl = document.getElementById('contractTemplate');
+    
+    // Clear all form inputs
+    if (formEl) {
+      const inputs = formEl.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+    }
+    
+    // Reset preview
+    if (previewEl && templateEl) {
+      previewEl.innerHTML = templateEl.innerHTML;
+    }
+    
+    // Reset global signature variables
+    signatureAImage = null;
+    signatureBImage = null;
+    
+    // Clear and reinitialize canvas
+    const canvasA = document.getElementById('signatureCanvasA');
+    const canvasB = document.getElementById('signatureCanvasB');
+    
+    if (canvasA) {
+      canvasA.style.pointerEvents = 'auto';
+      const ctxA = canvasA.getContext('2d');
+      ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
+      ctxA.strokeStyle = '#1d1f2c';
+      ctxA.lineWidth = 2;
+      ctxA.lineCap = 'round';
+      ctxA.lineJoin = 'round';
+    }
+    
+    if (canvasB) {
+      canvasB.style.pointerEvents = 'auto';
+      const ctxB = canvasB.getContext('2d');
+      ctxB.clearRect(0, 0, canvasB.width, canvasB.height);
+      ctxB.strokeStyle = '#1d1f2c';
+      ctxB.lineWidth = 2;
+      ctxB.lineCap = 'round';
+      ctxB.lineJoin = 'round';
+    }
+    
+    // Clear localStorage
+    localStorage.removeItem('eCurrentContractId');
+    
+    // Update UI
+    try {
+      updateProgress();
+    } catch (err) {
+      console.log('updateProgress not available:', err.message);
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error resetting form:', err);
+    throw err;
   }
 };
 
