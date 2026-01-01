@@ -1,3 +1,128 @@
+// ============================================================
+// UTILITIES & CONFIG
+// ============================================================
+
+// Settings
+const settings = {
+  autoSave: localStorage.getItem('settingAutoSave') !== 'false',
+  notifications: localStorage.getItem('settingNotifications') !== 'false',
+  keyboardShortcuts: localStorage.getItem('settingKeyboardShortcuts') !== 'false',
+  darkMode: localStorage.getItem('settingDarkMode') === 'true'
+};
+
+// Notification Toast
+const showNotification = (message, type = 'success', duration = 3000) => {
+  if (!settings.notifications) return;
+  
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-white bg-${type} border-0`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'error' ? 'exclamation-circle-fill' : 'info-circle-fill'}"></i> ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+  
+  container.appendChild(toast);
+  const bsToast = new bootstrap.Toast(toast);
+  bsToast.show();
+  
+  setTimeout(() => toast.remove(), duration);
+};
+
+// Dark Mode
+const initDarkMode = () => {
+  if (settings.darkMode) {
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) toggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+  }
+};
+
+const toggleDarkMode = () => {
+  const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-bs-theme');
+    localStorage.setItem('settingDarkMode', 'false');
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) toggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+    showNotification('Light mode activated', 'info');
+  } else {
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
+    localStorage.setItem('settingDarkMode', 'true');
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) toggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    showNotification('Dark mode activated', 'info');
+  }
+};
+
+// Auto-save
+let autoSaveTimer;
+const scheduleAutoSave = () => {
+  if (!settings.autoSave) return;
+  
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const existingId = document.getElementById('contractId')?.value || localStorage.getItem(currentContractKey) || '';
+    saveContractFromForm(existingId);
+    showNotification('Bản nháp đã lưu tự động', 'success', 1500);
+  }, 30000); // 30 giây
+};
+
+// Keyboard Shortcuts
+const initKeyboardShortcuts = () => {
+  if (!settings.keyboardShortcuts) return;
+
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+S: Save Draft
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveDraft();
+    }
+    // Ctrl+O: Open Draft
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+      e.preventDefault();
+      loadDraft();
+    }
+    // Ctrl+Shift+D: Dark Mode
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      toggleDarkMode();
+    }
+    // Ctrl+,: Settings
+    if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+      modal.show();
+    }
+  });
+};
+
+// Input Validation
+const validateInput = (value, type = 'text') => {
+  const sanitized = value.trim();
+  // Prevent XSS
+  const escaped = sanitized
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+  return escaped;
+};
+
+// ============================================================
+// MAIN VARIABLES
+// ============================================================
+
 const form = document.getElementById('contractBuilder');
 const preview = document.getElementById('contractPreview');
 const template = document.getElementById('contractTemplate');
@@ -12,8 +137,8 @@ const progressLabel = document.getElementById('progressLabel');
 const storageKey = 'eContractDraft';
 const contractsKey = 'eContracts';
 const shareLinksKey = 'eContractShareLinks';
-const ownerKey = 'eContractOwner'; // Key để lưu thông tin chủ sở hữu (Bên A)
-const currentContractKey = 'eCurrentContractId'; // Lưu tạm contract đang mở
+const ownerKey = 'eContractOwner';
+const currentContractKey = 'eCurrentContractId';
 
 // Quản lý hợp đồng và link chia sẻ
 let contracts = JSON.parse(localStorage.getItem(contractsKey) || '[]');
@@ -26,7 +151,6 @@ const isContractOwner = () => {
   
   try {
     const owner = JSON.parse(ownerData);
-    // Kiểm tra nếu có session active (đơn giản - có thể nâng cấp với authentication thật)
     return owner.active === true;
   } catch {
     return false;
@@ -460,104 +584,128 @@ const updateProgress = () => {
 };
 
 const saveDraft = () => {
-  const data = getData();
-  localStorage.setItem(storageKey, JSON.stringify(data));
-  saveDraftBtn.textContent = 'Đã lưu ✓';
-  setTimeout(() => (saveDraftBtn.textContent = 'Lưu bản nháp'), 2000);
+  try {
+    const data = getData();
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    saveDraftBtn.textContent = 'Đã lưu ✓';
+    showNotification('Bản nháp đã lưu thành công', 'success', 1500);
+    setTimeout(() => (saveDraftBtn.textContent = 'Lưu bản nháp'), 2000);
+  } catch (err) {
+    console.error('Save draft error:', err);
+    showNotification('Lỗi khi lưu bản nháp: ' + err.message, 'error');
+  }
 };
 
 const loadDraft = () => {
-  const raw = localStorage.getItem(storageKey);
-  if (!raw) {
-    alert('Chưa có bản nháp nào được lưu.');
-    return;
-  }
-  const data = JSON.parse(raw);
-  fieldNames.forEach((field) => {
-    if (data[field] !== undefined) {
-      form.elements[field].value = data[field];
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      showNotification('Chưa có bản nháp nào được lưu.', 'info');
+      return;
     }
-  });
-  renderContract();
-  updateProgress();
+    const data = JSON.parse(raw);
+    fieldNames.forEach((field) => {
+      if (data[field] !== undefined) {
+        form.elements[field].value = data[field];
+      }
+    });
+    renderContract();
+    updateProgress();
+    showNotification('Bản nháp đã được khôi phục', 'success', 1500);
+  } catch (err) {
+    console.error('Load draft error:', err);
+    showNotification('Lỗi khi tải bản nháp: ' + err.message, 'error');
+  }
 };
 
 const copyContract = async () => {
-  const text = preview.innerText.trim();
-  if (!text) {
-    alert('Chưa có nội dung để sao chép.');
-    return;
+  try {
+    const text = preview.innerText.trim();
+    if (!text) {
+      showNotification('Chưa có nội dung để sao chép.', 'warning');
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = 'Đã sao chép ✓';
+    showNotification('Nội dung đã sao chép', 'success', 1500);
+    setTimeout(() => (copyBtn.textContent = 'Sao chép nội dung'), 2000);
+  } catch (err) {
+    console.error('Copy error:', err);
+    showNotification('Lỗi khi sao chép: ' + err.message, 'error');
   }
-  await navigator.clipboard.writeText(text);
-  copyBtn.textContent = 'Đã sao chép ✓';
-  setTimeout(() => (copyBtn.textContent = 'Sao chép nội dung'), 2000);
 };
 
 const exportContract = async () => {
-  const html = preview.innerHTML.trim();
-  if (!html) {
-    alert('Chưa có nội dung để xuất.');
-    return;
-  }
-
-  const data = getData();
-  let checksumHtml = '';
   try {
-    const hash = await computeContractHash(data);
-    checksumHtml = `
-      <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 11px; color: #666;">
-        <p><strong>Checksum SHA-256:</strong></p>
-        <p style="font-family: monospace; word-break: break-all; background: #f5f5f5; padding: 0.5rem; border-radius: 4px;">
-          ${hash}
-        </p>
-        <p><small>Sử dụng checksum này để xác minh hợp đồng chưa bị chỉnh sửa.</small></p>
-      </div>
-    `;
-  } catch (err) {
-    console.error('Error computing hash:', err);
-  }
+    const html = preview.innerHTML.trim();
+    if (!html) {
+      showNotification('Chưa có nội dung để xuất.', 'warning');
+      return;
+    }
 
-  const watermarkHtml = data.partyAId && data.partyBId ? `
-    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; font-weight: bold; color: rgba(255, 107, 157, 0.08); pointer-events: none; white-space: nowrap; z-index: 1;">
-      ✓ ĐÃ KÝ
-    </div>
-  ` : '';
-
-  const printWindow = window.open('', '_blank', 'width=900,height=1200');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Hợp đồng điện tử</title>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: 'Inter', system-ui, sans-serif; padding: 3rem; line-height: 1.6; }
-          h3 { letter-spacing: 0.08em; text-align: center; }
-          section { margin-bottom: 1.25rem; }
-          ul { padding-left: 1.25rem; }
-          .signature-box { height: 80px; border: 1px dashed #cbd5f5; margin: 1rem 0; display: flex; align-items: center; justify-content: center; }
-          .signature-box img { max-width: 100%; max-height: 100px; }
-          .signatures { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e4e7ec; }
-          .signatures > div { flex: 1; text-align: center; padding: 0 1rem; }
-          .stamp { width: 80px; height: 80px; margin: 0.5rem auto; }
-          @media print {
-            body { padding: 1rem; }
-          }
-        </style>
-      </head>
-      <body>
-        ${watermarkHtml}
-        ${html}
-        ${checksumHtml}
-        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 10px; color: #999; text-align: center;">
-          <p>Hợp đồng được tạo và ký bằng hệ thống Hợp đồng Điện tử</p>
-          <p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p>
+    const data = getData();
+    let checksumHtml = '';
+    try {
+      const hash = await computeContractHash(data);
+      checksumHtml = `
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 11px; color: #666;">
+          <p><strong>Checksum SHA-256:</strong></p>
+          <p style="font-family: monospace; word-break: break-all; background: #f5f5f5; padding: 0.5rem; border-radius: 4px;">
+            ${hash}
+          </p>
+          <p><small>Sử dụng checksum này để xác minh hợp đồng chưa bị chỉnh sửa.</small></p>
         </div>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
+      `;
+    } catch (err) {
+      console.error('Error computing hash:', err);
+    }
+
+    const watermarkHtml = data.partyAId && data.partyBId ? `
+      <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; font-weight: bold; color: rgba(255, 107, 157, 0.08); pointer-events: none; white-space: nowrap; z-index: 1;">
+        ✓ ĐÃ KÝ
+      </div>
+    ` : '';
+
+    const printWindow = window.open('', '_blank', 'width=900,height=1200');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Hợp đồng điện tử</title>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: 'Inter', system-ui, sans-serif; padding: 3rem; line-height: 1.6; }
+            h3 { letter-spacing: 0.08em; text-align: center; }
+            section { margin-bottom: 1.25rem; }
+            ul { padding-left: 1.25rem; }
+            .signature-box { height: 80px; border: 1px dashed #cbd5f5; margin: 1rem 0; display: flex; align-items: center; justify-content: center; }
+            .signature-box img { max-width: 100%; max-height: 100px; }
+            .signatures { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e4e7ec; }
+            .signatures > div { flex: 1; text-align: center; padding: 0 1rem; }
+            .stamp { width: 80px; height: 80px; margin: 0.5rem auto; }
+            @media print {
+              body { padding: 1rem; }
+            }
+          </style>
+        </head>
+        <body>
+          ${watermarkHtml}
+          ${html}
+          ${checksumHtml}
+          <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 10px; color: #999; text-align: center;">
+            <p>Hợp đồng được tạo và ký bằng hệ thống Hợp đồng Điện tử</p>
+            <p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    showNotification('Hợp đồng đã được xuất PDF', 'success', 1500);
+  } catch (err) {
+    console.error('Export PDF error:', err);
+    showNotification('Lỗi khi xuất PDF: ' + err.message, 'error');
+  }
 };
 
 form.addEventListener('submit', (event) => {
@@ -575,7 +723,6 @@ form.addEventListener('submit', (event) => {
   } else {
     generateLinkBtn.style.display = 'none';
   }
-
   // If saved contract is signed, lock the form
   const savedContract = contracts.find(c => c.id === newId);
   if (isContractSigned(savedContract)) {
@@ -1775,3 +1922,115 @@ if (document.readyState === 'loading') {
   }
 }
 
+// ============================================================
+// SETTINGS & UI HANDLERS
+// ============================================================
+
+// Dark Mode Toggle
+document.getElementById('darkModeToggle')?.addEventListener('click', toggleDarkMode);
+
+// Settings Button
+document.getElementById('settingsBtn')?.addEventListener('click', () => {
+  // Sync current settings to toggle switches before opening modal
+  const autoSaveToggle = document.getElementById('autoSaveToggle');
+  const notificationsToggle = document.getElementById('notificationsToggle');
+  const keyboardShortcutsToggle = document.getElementById('keyboardShortcutsToggle');
+  
+  if (autoSaveToggle) autoSaveToggle.checked = settings.autoSave;
+  if (notificationsToggle) notificationsToggle.checked = settings.notifications;
+  if (keyboardShortcutsToggle) keyboardShortcutsToggle.checked = settings.keyboardShortcuts;
+  
+  const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+  modal.show();
+});
+
+// Settings Toggles
+document.getElementById('autoSaveToggle')?.addEventListener('change', (e) => {
+  settings.autoSave = e.target.checked;
+  localStorage.setItem('settingAutoSave', e.target.checked);
+  showNotification(e.target.checked ? 'Auto-save bật' : 'Auto-save tắt', 'info');
+});
+
+document.getElementById('notificationsToggle')?.addEventListener('change', (e) => {
+  settings.notifications = e.target.checked;
+  localStorage.setItem('settingNotifications', e.target.checked);
+});
+
+document.getElementById('keyboardShortcutsToggle')?.addEventListener('change', (e) => {
+  settings.keyboardShortcuts = e.target.checked;
+  localStorage.setItem('settingKeyboardShortcuts', e.target.checked);
+  showNotification(e.target.checked ? 'Phím tắt bật' : 'Phím tắt tắt', 'info');
+});
+
+// Clear Data
+document.getElementById('clearDataBtn')?.addEventListener('click', () => {
+  if (confirm('⚠️ Xóa tất cả dữ liệu hợp đồng? Hành động này không thể hoàn tác!')) {
+    localStorage.clear();
+    contracts = [];
+    shareLinks = {};
+    signatureAImage = null;
+    signatureBImage = null;
+    form.reset();
+    preview.innerHTML = emptyState;
+    updateProgress();
+    showNotification('Đã xóa tất cả dữ liệu', 'success');
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+    if (modal) modal.hide();
+  }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  initDarkMode();
+  initKeyboardShortcuts();
+  setTodayDate();
+  if (preview) preview.innerHTML = emptyState;
+  updateProgress();
+  setupSignatureCanvas('signatureCanvasA', 'clearSignatureA');
+  setupSignatureCanvas('signatureCanvasB', 'clearSignatureB');
+  setupPresetHandlers();
+  handleRemoteSigning();
+  checkPermissions();
+  
+  // Auto-save event listeners
+  form?.addEventListener('input', scheduleAutoSave);
+  form?.addEventListener('change', scheduleAutoSave);
+  
+  // Current contract check
+  const currentId = localStorage.getItem(currentContractKey);
+  if (currentId) {
+    const c = contracts.find(x => x.id === currentId);
+    if (isContractSigned(c)) {
+      if (c.signatureA) {
+        signatureAImage = c.signatureA;
+        const canvasA = document.getElementById('signatureCanvasA');
+        if (canvasA) {
+          const ctxA = canvasA.getContext('2d');
+          const img = new Image();
+          img.onload = () => ctxA.drawImage(img, 0, 0, canvasA.width, canvasA.height);
+          img.src = c.signatureA;
+        }
+      }
+      if (c.signatureB) {
+        signatureBImage = c.signatureB;
+        const canvasB = document.getElementById('signatureCanvasB');
+        if (canvasB) {
+          const ctxB = canvasB.getContext('2d');
+          const img = new Image();
+          img.onload = () => ctxB.drawImage(img, 0, 0, canvasB.width, canvasB.height);
+          img.src = c.signatureB;
+        }
+      }
+      lockForm(currentId);
+    }
+  }
+});
+
+if (document.readyState === 'loading') {
+  // DOM chưa load xong
+} else {
+  // DOM đã load xong
+  initDarkMode();
+  initKeyboardShortcuts();
+}

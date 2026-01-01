@@ -1,47 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trình tạo hợp đồng điện tử</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Trình tạo hợp đồng điện tử chuyên nghiệp với ký số, dấu điện tử, xác minh checksum, và lưu trữ an toàn" />
+    <meta name="keywords" content="hợp đồng điện tử, ký số, dấu điện tử, PDF, checksum, QR code" />
+    <meta name="theme-color" content="#ff6b9d" />
+    <title>Trình tạo hợp đồng điện tử - Ký số an toàn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnec                    </div>
-                  </div>
-                </div>
-              </div>
-             <div class="col-12">
-               <hr class="my-4" />
-               <label class="form-label fw-bold">
-                 <i class="bi bi-stamp"></i> Dấu điện tử (Con dấu)
-               </label>
-             </div>
-             <div class="col-md-6">
-               <label class="form-label fw-semibold">
-                 <i class="bi bi-building"></i> Tên công ty/tổ chức (Bên A)
-               </label>
-               <input type="text" class="form-control" name="stampCompanyA" placeholder="Ví dụ: Công ty TNHH ABC" />
-             </div>
-             <div class="col-md-6">
-               <label class="form-label fw-semibold">
-                 <i class="bi bi-person-badge"></i> Chức vụ (Bên A)
-               </label>
-               <input type="text" class="form-control" name="stampPositionA" placeholder="Ví dụ: Tổng giám đốc" />
-             </div>
-             <div class="col-md-6">
-               <label class="form-label fw-semibold">
-                 <i class="bi bi-building"></i> Tên công ty/tổ chức (Bên B)
-               </label>
-               <input type="text" class="form-control" name="stampCompanyB" placeholder="Ví dụ: Công ty TNHH XYZ" />
-             </div>
-             <div class="col-md-6">
-               <label class="form-label fw-semibold">
-                 <i class="bi bi-person-badge"></i> Chức vụ (Bên B)
-               </label>
-               <input type="text" class="form-control" name="stampPositionB" placeholder="Ví dụ: Giám đốc" />
-             </div>
-            </div>
-          </div>
-          <div class="form-actions mt-4 pt-3 border-top">="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
@@ -55,20 +22,31 @@
   <body>
     <header class="hero">
       <div class="hero__content">
-        <span class="badge bg-primary mb-3">
-          <i class="bi bi-star-fill"></i> Beta • Miễn phí
-        </span>
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="badge bg-primary mb-3">
+              <i class="bi bi-star-fill"></i> v2.0 • Miễn phí • Bảo Mật
+            </span>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" id="darkModeToggle" title="Toggle dark mode (Ctrl+Shift+D)">
+              <i class="bi bi-moon-fill"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" id="settingsBtn" title="Cài đặt (Ctrl+,)">
+              <i class="bi bi-gear-fill"></i>
+            </button>
+          </div>
+        </div>
         <h1 class="display-4 fw-bold mb-3">Trình tạo hợp đồng điện tử</h1>
         <p class="lead text-muted mb-4">
-          Nhập thông tin hai bên, phạm vi công việc và điều khoản thanh toán để
-          tạo ra hợp đồng chuyên nghiệp trong vài phút. Hỗ trợ xuất file PDF, 
-          ký từ xa và lưu nháp cục bộ.
+          Tạo, ký, xác minh hợp đồng với con dấu điện tử, checksum SHA-256 và QR code.
+          Dữ liệu lưu 100% trên máy của bạn. <strong>Bảo mật cao, sử dụng miễn phí.</strong>
         </p>
         <div class="hero__actions d-flex flex-wrap gap-2">
           <a class="btn btn-primary btn-lg" href="#contract-form">
             <i class="bi bi-file-earmark-plus"></i> Bắt đầu soạn thảo
           </a>
-          <button class="btn btn-outline-primary btn-lg" type="button" id="loadDraftBtn">
+          <button class="btn btn-outline-primary btn-lg" type="button" id="loadDraftBtn" title="Ctrl+O">
             <i class="bi bi-arrow-clockwise"></i> Khôi phục bản nháp
           </button>
         </div>
@@ -640,6 +618,62 @@
       </div>
     </div>
 
+    <!-- Modal Settings -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalLabel">
+              <i class="bi bi-gear-fill text-primary"></i> Cài đặt
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="autoSaveToggle" checked>
+                <span class="form-check-label">Tự động lưu nháp (Auto-save)</span>
+              </label>
+              <small class="text-muted d-block mt-1">Lưu tự động mỗi 30 giây</small>
+            </div>
+            <hr>
+            <div class="mb-3">
+              <label class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="notificationsToggle" checked>
+                <span class="form-check-label">Thông báo</span>
+              </label>
+              <small class="text-muted d-block mt-1">Hiển thị thông báo khi thực hiện hành động</small>
+            </div>
+            <hr>
+            <div class="mb-3">
+              <label class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="keyboardShortcutsToggle" checked>
+                <span class="form-check-label">Phím tắt (Keyboard Shortcuts)</span>
+              </label>
+              <small class="text-muted d-block mt-1">
+                Ctrl+S (Save), Ctrl+O (Open), Ctrl+Shift+D (Dark Mode), Ctrl+, (Settings)
+              </small>
+            </div>
+            <hr>
+            <div class="mb-3">
+              <button class="btn btn-outline-danger btn-sm w-100" id="clearDataBtn">
+                <i class="bi bi-trash"></i> Xóa tất cả dữ liệu
+              </button>
+              <small class="text-muted d-block mt-2">⚠️ Hành động này không thể hoàn tác</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; pointer-events: none;">
+      <div id="toastContainer"></div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <!-- QR Code Library -->
@@ -647,4 +681,3 @@
     <script src="script.js" type="module"></script>
   </body>
 </html>
-
