@@ -108,12 +108,14 @@ const initKeyboardShortcuts = () => {
         // Clear signature canvases
         const canvasA = document.getElementById('signatureCanvasA');
         const canvasB = document.getElementById('signatureCanvasB');
-        if (canvasA) canvasA.getContext('2d').clearRect(0, 0, canvasA.width, canvasA.height);
-        if (canvasB) canvasB.getContext('2d').clearRect(0, 0, canvasB.width, canvasB.height);
-        
-        // Re-initialize signature canvas listeners
-        setupSignatureCanvas('signatureCanvasA', 'clearSignatureA');
-        setupSignatureCanvas('signatureCanvasB', 'clearSignatureB');
+        if (canvasA) {
+          canvasA.style.pointerEvents = 'auto';
+          canvasA.getContext('2d').clearRect(0, 0, canvasA.width, canvasA.height);
+        }
+        if (canvasB) {
+          canvasB.style.pointerEvents = 'auto';
+          canvasB.getContext('2d').clearRect(0, 0, canvasB.width, canvasB.height);
+        }
         
         updateProgress();
         localStorage.removeItem(currentContractKey);
@@ -1728,11 +1730,10 @@ const setupSignatureCanvas = (canvasId, clearBtnId) => {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   
-  // Clone canvas to remove all old event listeners
-  const newCanvas = canvas.cloneNode(true);
-  canvas.parentElement.replaceChild(newCanvas, canvas);
-  
-  const ctx = newCanvas.getContext('2d');
+  // Reset canvas state
+  canvas.style.pointerEvents = 'auto';
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = '#1d1f2c';
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
@@ -1743,9 +1744,9 @@ const setupSignatureCanvas = (canvasId, clearBtnId) => {
   let lastY = 0;
   
   const getMousePos = (e) => {
-    const rect = newCanvas.getBoundingClientRect();
-    const scaleX = newCanvas.width / rect.width;
-    const scaleY = newCanvas.height / rect.height;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
       x: (e.clientX - rect.left) * scaleX,
       y: (e.clientY - rect.top) * scaleY
@@ -1776,7 +1777,7 @@ const setupSignatureCanvas = (canvasId, clearBtnId) => {
     if (isDrawing) {
       isDrawing = false;
       // Lưu chữ ký dưới dạng hình ảnh
-      const imageData = newCanvas.toDataURL('image/png');
+      const imageData = canvas.toDataURL('image/png');
       if (canvasId === 'signatureCanvasA') {
         signatureAImage = imageData;
       } else {
@@ -1786,54 +1787,50 @@ const setupSignatureCanvas = (canvasId, clearBtnId) => {
     }
   };
   
-  newCanvas.addEventListener('mousedown', startDrawing);
-  newCanvas.addEventListener('mousemove', draw);
-  newCanvas.addEventListener('mouseup', stopDrawing);
-  newCanvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
   
   // Hỗ trợ cảm ứng
-  newCanvas.addEventListener('touchstart', (e) => {
+  canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const touch = e.touches[0];
     const mouseEvent = new MouseEvent('mousedown', {
       clientX: touch.clientX,
       clientY: touch.clientY
     });
-    newCanvas.dispatchEvent(mouseEvent);
+    canvas.dispatchEvent(mouseEvent);
   });
   
-  newCanvas.addEventListener('touchmove', (e) => {
+  canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     const touch = e.touches[0];
     const mouseEvent = new MouseEvent('mousemove', {
       clientX: touch.clientX,
       clientY: touch.clientY
     });
-    newCanvas.dispatchEvent(mouseEvent);
+    canvas.dispatchEvent(mouseEvent);
   });
   
-  newCanvas.addEventListener('touchend', (e) => {
+  canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     const mouseEvent = new MouseEvent('mouseup', {});
-    newCanvas.dispatchEvent(mouseEvent);
+    canvas.dispatchEvent(mouseEvent);
   });
   
   // Nút xóa
   const clearBtn = document.getElementById(clearBtnId);
   if (clearBtn) {
-    // Remove old listener if exists
-    const newClearBtn = clearBtn.cloneNode(true);
-    clearBtn.parentElement.replaceChild(newClearBtn, clearBtn);
-    
-    newClearBtn.addEventListener('click', () => {
-      ctx.clearRect(0, 0, newCanvas.width, newCanvas.height);
+    clearBtn.onclick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (canvasId === 'signatureCanvasA') {
         signatureAImage = null;
       } else {
         signatureBImage = null;
       }
       renderContract();
-    });
+    };
   }
 };
 
