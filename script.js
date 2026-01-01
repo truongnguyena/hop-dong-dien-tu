@@ -398,6 +398,10 @@ const lockForm = (contractId) => {
     if (b) b.style.display = 'none';
   });
 
+  // Show Download PDF button
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  if (downloadPdfBtn) downloadPdfBtn.style.display = 'inline-block';
+
   // Show locked badge and watermark
   const lockedNoticeId = 'contractLockedNotice';
   if (!document.getElementById(lockedNoticeId)) {
@@ -461,6 +465,10 @@ const unlockForm = () => {
     const b = document.getElementById(id);
     if (b) b.style.display = 'inline-block';
   });
+
+  // Hide Download PDF button
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  if (downloadPdfBtn) downloadPdfBtn.style.display = 'none';
 
   // Remove locked notice
   const notice = document.getElementById('contractLockedNotice');
@@ -761,6 +769,70 @@ const exportContract = async () => {
   } catch (err) {
     console.error('Export PDF error:', err);
     showNotification('Lỗi khi xuất PDF: ' + err.message, 'error');
+  }
+};
+
+// Download PDF directly
+const downloadPDF = async () => {
+  try {
+    const html = preview.innerHTML.trim();
+    if (!html) {
+      showNotification('Chưa có nội dung để tải.', 'warning');
+      return;
+    }
+
+    const data = getData();
+    let checksumHtml = '';
+    try {
+      const hash = await computeContractHash(data);
+      checksumHtml = `
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 11px; color: #666;">
+          <p><strong>Checksum SHA-256:</strong></p>
+          <p style="font-family: monospace; word-break: break-all; background: #f5f5f5; padding: 0.5rem; border-radius: 4px;">
+            ${hash}
+          </p>
+          <p><small>Sử dụng checksum này để xác minh hợp đồng chưa bị chỉnh sửa.</small></p>
+        </div>
+      `;
+    } catch (err) {
+      console.error('Error computing hash:', err);
+    }
+
+    const watermarkHtml = data.partyAId && data.partyBId ? `
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; font-weight: bold; color: rgba(255, 107, 157, 0.08); pointer-events: none; white-space: nowrap; z-index: 1;">
+        ✓ ĐÃ KÝ
+      </div>
+    ` : '';
+
+    // Create PDF element
+    const pdfContent = document.createElement('div');
+    pdfContent.innerHTML = `
+      <div style="font-family: 'Inter', system-ui, sans-serif; padding: 2rem; line-height: 1.6; position: relative;">
+        ${watermarkHtml}
+        ${html}
+        ${checksumHtml}
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 10px; color: #999; text-align: center;">
+          <p>Hợp đồng được tạo và ký bằng hệ thống Hợp đồng Điện tử</p>
+          <p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p>
+        </div>
+      </div>
+    `;
+
+    // PDF options
+    const opt = {
+      margin: 10,
+      filename: `hop-dong-${new Date().getTime()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    };
+
+    // Generate and download PDF
+    html2pdf().set(opt).from(pdfContent).save();
+    showNotification('Hợp đồng đã được tải xuống', 'success', 1500);
+  } catch (err) {
+    console.error('Download PDF error:', err);
+    showNotification('Lỗi khi tải PDF: ' + err.message, 'error');
   }
 };
 
@@ -1549,6 +1621,11 @@ saveDraftBtn.addEventListener('click', saveDraft);
 loadDraftBtn.addEventListener('click', loadDraft);
 copyBtn.addEventListener('click', copyContract);
 exportBtn.addEventListener('click', exportContract);
+
+// Download PDF button
+const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+downloadPdfBtn?.addEventListener('click', downloadPDF);
+
 generateLinkBtn?.addEventListener('click', generateShareLink);
 
 // Nút xác minh hợp đồng - hiển thị checksum & QR code
