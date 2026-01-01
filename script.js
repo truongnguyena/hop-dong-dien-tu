@@ -99,9 +99,14 @@ const initKeyboardShortcuts = () => {
         // First unlock form to allow reset
         unlockForm();
         
+        // Get form reference
+        const form = document.getElementById('contractBuilder');
+        const preview = document.getElementById('contractPreview');
+        const emptyState = document.getElementById('contractTemplate')?.innerHTML || '';
+        
         // Now reset the form
-        form.reset();
-        preview.innerHTML = emptyState;
+        if (form) form.reset();
+        if (preview) preview.innerHTML = emptyState;
         signatureAImage = null;
         signatureBImage = null;
         
@@ -438,6 +443,9 @@ const lockForm = (contractId) => {
 
 // Unlock form (reverse of lockForm)
 const unlockForm = () => {
+  const form = document.getElementById('contractBuilder');
+  if (!form) return;
+  
   // Enable all inputs/selects/textarea in the form
   const elements = form.querySelectorAll('input, select, textarea');
   elements.forEach(el => {
