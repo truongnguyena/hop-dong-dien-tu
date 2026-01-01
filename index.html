@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trình tạo hợp đồng điện tử</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnec                    </div>
+                  </div>
+                </div>
+              </div>
+             <div class="col-12">
+               <hr class="my-4" />
+               <label class="form-label fw-bold">
+                 <i class="bi bi-stamp"></i> Dấu điện tử (Con dấu)
+               </label>
+             </div>
+             <div class="col-md-6">
+               <label class="form-label fw-semibold">
+                 <i class="bi bi-building"></i> Tên công ty/tổ chức (Bên A)
+               </label>
+               <input type="text" class="form-control" name="stampCompanyA" placeholder="Ví dụ: Công ty TNHH ABC" />
+             </div>
+             <div class="col-md-6">
+               <label class="form-label fw-semibold">
+                 <i class="bi bi-person-badge"></i> Chức vụ (Bên A)
+               </label>
+               <input type="text" class="form-control" name="stampPositionA" placeholder="Ví dụ: Tổng giám đốc" />
+             </div>
+             <div class="col-md-6">
+               <label class="form-label fw-semibold">
+                 <i class="bi bi-building"></i> Tên công ty/tổ chức (Bên B)
+               </label>
+               <input type="text" class="form-control" name="stampCompanyB" placeholder="Ví dụ: Công ty TNHH XYZ" />
+             </div>
+             <div class="col-md-6">
+               <label class="form-label fw-semibold">
+                 <i class="bi bi-person-badge"></i> Chức vụ (Bên B)
+               </label>
+               <input type="text" class="form-control" name="stampPositionB" placeholder="Ví dụ: Giám đốc" />
+             </div>
+            </div>
+          </div>
+          <div class="form-actions mt-4 pt-3 border-top">="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+     <!-- Bootstrap 5 CSS -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <span class="badge bg-primary mb-3">
+          <i class="bi bi-star-fill"></i> Beta • Miễn phí
+        </span>
+        <h1 class="display-4 fw-bold mb-3">Trình tạo hợp đồng điện tử</h1>
+        <p class="lead text-muted mb-4">
+          Nhập thông tin hai bên, phạm vi công việc và điều khoản thanh toán để
+          tạo ra hợp đồng chuyên nghiệp trong vài phút. Hỗ trợ xuất file PDF, 
+          ký từ xa và lưu nháp cục bộ.
+        </p>
+        <div class="hero__actions d-flex flex-wrap gap-2">
+          <a class="btn btn-primary btn-lg" href="#contract-form">
+            <i class="bi bi-file-earmark-plus"></i> Bắt đầu soạn thảo
+          </a>
+          <button class="btn btn-outline-primary btn-lg" type="button" id="loadDraftBtn">
+            <i class="bi bi-arrow-clockwise"></i> Khôi phục bản nháp
+          </button>
+        </div>
+      </div>
+      <div class="hero__card card shadow-lg">
+        <div class="card-body">
+          <h6 class="card-title fw-bold mb-3">
+            <i class="bi bi-clipboard-check text-primary"></i> Tỷ lệ hoàn thành
+          </h6>
+          <div class="progress mb-3" style="height: 12px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 id="progressBar" 
+                 style="width: 0%"
+                 aria-valuenow="0" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="h4 mb-0 fw-bold text-primary" id="progressLabel">0%</span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <small class="text-muted">
+              <i class="bi bi-shield-check"></i> Dữ liệu chỉ lưu trong trình duyệt của bạn
+            </small>
+            <span class="security-badge" id="securityBadge" style="display: none;">
+              <i class="bi bi-lock-fill"></i> Bảo mật: Chỉ Bên A xem được
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+       <section class="panel card shadow-lg border-0" id="contract-form">
+         <div class="card-header bg-transparent border-0 pb-0 pt-3 px-3">
+           <h2 class="card-title mb-0 h5 fw-bold">
+             <i class="bi bi-file-earmark-text text-primary"></i> Thông tin hợp đồng
+           </h2>
+         </div>
+         <div class="card-body px-3 pb-3">
+        <form id="contractBuilder">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-building"></i> Tên bên A
+              </label>
+              <input type="text" class="form-control" name="partyAName" placeholder="Công ty ABC" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-card-text"></i> Mã số thuế/CCCD bên A
+              </label>
+              <input type="text" class="form-control" name="partyAId" placeholder="0101234567" />
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-geo-alt"></i> Địa chỉ bên A
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                name="partyAAddress"
+                placeholder="Số 1, Đường A, Quận B, TP. Hà Nội"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-building"></i> Tên bên B
+              </label>
+              <input type="text" class="form-control" name="partyBName" placeholder="Công ty XYZ" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-card-text"></i> Mã số thuế/CCCD bên B
+              </label>
+              <input type="text" class="form-control" name="partyBId" placeholder="0317654321" />
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-geo-alt"></i> Địa chỉ bên B
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                name="partyBAddress"
+                placeholder="Số 20, Đường C, Quận D, TP. Hồ Chí Minh"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-file-earmark-text"></i> Loại hợp đồng
+              </label>
+              <select class="form-select" name="contractType">
+                <option value="Cung cấp dịch vụ">Cung cấp dịch vụ</option>
+                <option value="Hợp đồng lao động">Hợp đồng lao động</option>
+                <option value="Hợp đồng mua bán">Hợp đồng mua bán</option>
+                <option value="Gia công phần mềm">Gia công phần mềm</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-currency-exchange"></i> Giá trị hợp đồng (VNĐ)
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                name="contractValue"
+                placeholder="500000000"
+                min="0"
+                step="1000"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-calendar-check"></i> Ngày tạo hợp đồng
+              </label>
+              <input type="date" class="form-control" name="createdDate" id="createdDate" readonly />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-calendar-event"></i> Ngày hiệu lực
+              </label>
+              <input type="date" class="form-control" name="effectiveDate" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-calendar-x"></i> Ngày kết thúc
+              </label>
+              <input type="date" class="form-control" name="expiryDate" />
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-briefcase"></i> Phạm vi công việc
+              </label>
+              <select name="scopePreset" id="scopePreset" class="form-select mb-2">
+                <option value="">-- Chọn điều khoản có sẵn (tùy chọn) --</option>
+                <option value="scope1">Phát triển và triển khai hệ thống phần mềm theo yêu cầu</option>
+                <option value="scope2">Cung cấp dịch vụ tư vấn và hỗ trợ kỹ thuật</option>
+                <option value="scope3">Sản xuất và giao hàng sản phẩm theo đơn đặt hàng</option>
+                <option value="scope4">Thực hiện các công việc gia công theo thỏa thuận</option>
+                <option value="scope5">Cung cấp dịch vụ bảo trì và bảo hành định kỳ</option>
+                <option value="scope6">Đào tạo và chuyển giao công nghệ</option>
+              </select>
+              <textarea
+                class="form-control"
+                name="scope"
+                rows="3"
+                placeholder="Hoặc mô tả chi tiết phạm vi dịch vụ, sản phẩm, KPI..."
+              ></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-cash-coin"></i> Điều khoản thanh toán
+              </label>
+              <select name="paymentPreset" id="paymentPreset" class="form-select mb-2">
+                <option value="">-- Chọn điều khoản có sẵn (tùy chọn) --</option>
+                <option value="payment1">Thanh toán 100% trước khi thực hiện</option>
+                <option value="payment2">Thanh toán 50% sau ký kết, 50% sau nghiệm thu</option>
+                <option value="payment3">Thanh toán 30% sau ký kết, 40% tiến độ, 30% hoàn thành</option>
+                <option value="payment4">Thanh toán theo từng hạng mục nghiệm thu</option>
+                <option value="payment5">Thanh toán theo hóa đơn hàng tháng</option>
+                <option value="payment6">Thanh toán trả chậm 30/60/90 ngày</option>
+              </select>
+              <textarea
+                class="form-control"
+                name="paymentTerms"
+                rows="3"
+                placeholder="Hoặc nhập điều khoản thanh toán tùy chỉnh..."
+              ></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-shield-check"></i> Điều khoản đặc biệt
+              </label>
+              <select name="specialPreset" id="specialPreset" class="form-select mb-2">
+                <option value="">-- Chọn điều khoản có sẵn (tùy chọn) --</option>
+                <option value="special1">Bảo mật thông tin và không tiết lộ cho bên thứ ba</option>
+                <option value="special2">Sở hữu trí tuệ thuộc về bên A sau khi thanh toán</option>
+                <option value="special3">Phạt vi phạm 0.5% giá trị hợp đồng/ngày chậm trễ</option>
+                <option value="special4">Bảo hành 12 tháng kể từ ngày nghiệm thu</option>
+                <option value="special5">Quyền kiểm tra và giám sát của Bên A</option>
+                <option value="special6">Điều khoản về bất khả kháng</option>
+                <option value="special7">Cam kết không cạnh tranh không lành mạnh</option>
+                <option value="special8">Quyền đơn phương chấm dứt hợp đồng</option>
+              </select>
+              <textarea
+                class="form-control"
+                name="specialTerms"
+                rows="3"
+                placeholder="Hoặc nhập điều khoản đặc biệt tùy chỉnh..."
+              ></textarea>
+            </div>
+             <div class="col-12">
+               <div class="card bg-light border-0">
+                 <div class="card-body">
+                   <div class="form-check form-switch mb-2">
+                     <input class="form-check-input" type="checkbox" id="remoteSigning" name="remoteSigning">
+                     <label class="form-check-label fw-semibold" for="remoteSigning">
+                       <i class="bi bi-link-45deg"></i> Bên B ký từ xa (tạo link chia sẻ)
+                     </label>
+                   </div>
+                   <small class="text-muted">
+                     <i class="bi bi-info-circle"></i> Kích hoạt để tạo link cho Bên B ký hợp đồng từ xa
+                   </small>
+                 </div>
+               </div>
+             </div>
+             <div class="col-12" id="remoteSigningSection" style="display: none;">
+               <div class="alert alert-info border-0 d-flex align-items-start" role="alert">
+                 <i class="bi bi-info-circle me-2 fs-5"></i>
+                 <div>
+                   <strong>Ký từ xa:</strong> Sau khi tạo hợp đồng, bạn sẽ nhận được link chia sẻ để gửi cho Bên B ký kết.
+                 </div>
+               </div>
+             </div>
+             <div class="col-12">
+               <label class="form-label fw-bold">
+                 <i class="bi bi-pen"></i> Chữ ký điện tử
+               </label>
+             </div>
+             <div class="col-12">
+               <div class="row g-3">
+                 <div class="col-md-6 signature-group">
+                   <label class="form-label fw-semibold">
+                     <i class="bi bi-person-check"></i> Chữ ký Bên A
+                   </label>
+                   <div class="signature-canvas-container">
+                     <canvas id="signatureCanvasA" width="400" height="150" class="w-100"></canvas>
+                     <div class="signature-actions mt-2">
+                       <button type="button" class="btn btn-outline-danger btn-sm" id="clearSignatureA">
+                         <i class="bi bi-x-circle"></i> Xóa chữ ký
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="col-md-6 signature-group" id="signatureGroupB">
+                   <label class="form-label fw-semibold">
+                     <i class="bi bi-person-check"></i> Chữ ký Bên B
+                     <span class="badge bg-secondary ms-2" id="remoteBadge" style="display: none;">
+                       <i class="bi bi-link-45deg"></i> Từ xa
+                     </span>
+                   </label>
+                   <div class="signature-canvas-container">
+                     <canvas id="signatureCanvasB" width="400" height="150" class="w-100"></canvas>
+                     <div class="signature-actions mt-2">
+                       <button type="button" class="btn btn-outline-danger btn-sm" id="clearSignatureB">
+                         <i class="bi bi-x-circle"></i> Xóa chữ ký
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+          </div>
+          <div class="form-actions mt-4 pt-3 border-top">
+            <div class="row g-2">
+              <div class="col-12 col-md-6 d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-info btn-sm" type="button" id="exportJsonBtn">
+                  <i class="bi bi-download"></i> <span class="d-none d-sm-inline">Xuất JSON</span>
+                </button>
+                <button class="btn btn-outline-success btn-sm" type="button" id="importJsonBtn">
+                  <i class="bi bi-upload"></i> <span class="d-none d-sm-inline">Nhập JSON</span>
+                </button>
+                <button class="btn btn-outline-primary btn-sm" type="button" id="manageContractsBtn">
+                  <i class="bi bi-folder"></i> <span class="d-none d-sm-inline">Quản lý</span>
+                </button>
+              </div>
+              <div class="col-12 col-md-6 d-flex flex-wrap gap-2 justify-content-md-end">
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="saveDraftBtn">
+                  <i class="bi bi-save"></i> <span class="d-none d-sm-inline">Lưu nháp</span>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" type="reset">
+                  <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Xóa</span>
+                </button>
+                    <button class="btn btn-primary btn-gradient btn-sm" type="submit">
+                      <i class="bi bi-file-earmark-check"></i> <span class="d-none d-sm-inline">Tạo hợp đồng</span>
+                    </button>
+                    <button class="btn btn-success btn-sm" type="button" id="finalizeSignBtn" title="Ký và khóa hợp đồng (Bên A)">
+                      <i class="bi bi-lock"></i> <span class="d-none d-sm-inline">Ký &amp; Khoá (Bên A)</span>
+                    </button>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="jsonFileInput" accept=".json" style="display: none;" />
+              <input type="hidden" id="contractId" name="contractId" value="" />
+        </form>
+        </div>
+      </section>
+
+       <section class="panel preview-panel card shadow-lg border-0">
+         <div class="card-header bg-transparent border-0 pb-0 pt-3 px-3">
+           <div class="row g-3 align-items-center">
+             <div class="col-12 col-md-6">
+               <h2 class="card-title mb-0 h5 fw-bold">
+                 <i class="bi bi-eye text-primary"></i> Xem trước hợp đồng
+               </h2>
+             </div>
+             <div class="col-12 col-md-6">
+               <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                 <button class="btn btn-outline-secondary btn-sm" type="button" id="timelineBtn" title="Xem lịch sử thay đổi">
+                   <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Timeline</span>
+                 </button>
+                 <button class="btn btn-outline-secondary btn-sm" type="button" id="copyContractBtn">
+                   <i class="bi bi-clipboard"></i> <span class="d-none d-sm-inline">Sao chép</span>
+                 </button>
+                 <button class="btn btn-outline-success btn-sm" type="button" id="verifyBtn" title="Xem checksum & QR code xác minh">
+                   <i class="bi bi-shield-check"></i> <span class="d-none d-sm-inline">Xác minh</span>
+                 </button>
+                 <button class="btn btn-outline-primary btn-sm" type="button" id="generateLinkBtn" style="display: none;">
+                   <i class="bi bi-share"></i> <span class="d-none d-sm-inline">Link ký từ xa</span>
+                 </button>
+                 <button class="btn btn-primary btn-gradient btn-sm" type="button" id="exportPdfBtn">
+                   <i class="bi bi-file-pdf"></i> <span class="d-none d-sm-inline">Xuất PDF</span>
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+        <div class="card-body">
+        <article class="contract" id="contractPreview">
+          <p class="empty-state">
+            Điền thông tin để tạo nội dung hợp đồng. Phần xem trước sẽ hiển thị
+            ngay tại đây.
+          </p>
+        </article>
+        </div>
+      </section>
+    </main>
+
+    <template id="contractTemplate">
+      <h3>HỢP ĐỒNG <span data-field="contractType"></span></h3>
+      <p class="muted">
+        Ngày tạo hợp đồng: <span data-field="createdDate"></span><br>
+        Ngày có hiệu lực: <span data-field="effectiveDate"></span>
+      </p>
+      <section>
+        <h4>Điều 1. Thông tin các bên</h4>
+        <p>
+          <strong>Bên A:</strong>
+          <span data-field="partyAName"></span> (MST/CCCD:
+          <span data-field="partyAId"></span>), địa chỉ
+          <span data-field="partyAAddress"></span>.
+        </p>
+        <p>
+          <strong>Bên B:</strong>
+          <span data-field="partyBName"></span> (MST/CCCD:
+          <span data-field="partyBId"></span>), địa chỉ
+          <span data-field="partyBAddress"></span>.
+        </p>
+      </section>
+      <section>
+        <h4>Điều 2. Phạm vi và giá trị hợp đồng</h4>
+        <p data-field="scope"></p>
+        <p>
+          <strong>Giá trị:</strong>
+          <span data-field="contractValue"></span> VNĐ (đã bao gồm thuế nếu có).
+        </p>
+      </section>
+      <section>
+        <h4>Điều 3. Thời hạn thực hiện</h4>
+        <p>
+          Hợp đồng có hiệu lực từ ngày
+          <span data-field="effectiveDate"></span> đến hết ngày
+          <span data-field="expiryDate"></span>. Gia hạn được thực hiện trên cơ
+          sở phụ lục kèm theo.
+        </p>
+      </section>
+      <section>
+        <h4>Điều 4. Điều khoản thanh toán</h4>
+        <p data-field="paymentTerms"></p>
+      </section>
+      <section>
+        <h4>Điều 5. Điều khoản đặc biệt</h4>
+        <p data-field="specialTerms"></p>
+      </section>
+      <section>
+        <h4>Điều 6. Cam kết chung</h4>
+        <ul>
+          <li>Hai bên cam kết cung cấp thông tin trung thực và chính xác.</li>
+          <li>
+            Tranh chấp phát sinh sẽ được ưu tiên giải quyết bằng thương lượng,
+            nếu không thành sẽ đưa ra tòa án có thẩm quyền.
+          </li>
+          <li>
+            Hợp đồng có giá trị pháp lý tương đương bản giấy khi được ký số hoặc
+            xác nhận bằng email doanh nghiệp.
+          </li>
+        </ul>
+      </section>
+      <section class="signatures">
+        <div>
+          <p><strong>Đại diện Bên A</strong></p>
+          <div class="signature-box" id="signatureDisplayA">
+            <img id="signatureImgA" style="max-width: 100%; max-height: 100px; display: none;" />
+          </div>
+          <p data-field="partyAName"></p>
+        </div>
+        <div>
+          <p><strong>Đại diện Bên B</strong></p>
+          <div class="signature-box" id="signatureDisplayB">
+            <img id="signatureImgB" style="max-width: 100%; max-height: 100px; display: none;" />
+          </div>
+          <p data-field="partyBName"></p>
+        </div>
+      </section>
+      <footer>
+        <p>
+          Hợp đồng được tạo trên nền tảng hợp đồng điện tử. Mọi dữ liệu lưu cục
+          bộ và có thể xuất ra PDF để lưu trữ.
+        </p>
+      </footer>
+    </template>
+
+    <!-- Modal quản lý hợp đồng -->
+    <div class="modal fade" id="manageContractsModal" tabindex="-1" aria-labelledby="manageContractsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="manageContractsModalLabel">
+              <i class="bi bi-folder-fill text-primary"></i> Quản lý hợp đồng đã lưu
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="contractsList" class="row g-3">
+              <div class="col-12 text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Chưa có hợp đồng nào được lưu
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal cho link chia sẻ -->
+    <div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLinkModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="shareLinkModalLabel">
+              <i class="bi bi-share-fill text-primary"></i> Link ký từ xa cho Bên B
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div>Link đã được tạo thành công! Gửi link này cho Bên B để họ ký hợp đồng.</div>
+            </div>
+            <div class="mb-3">
+              <label for="shareLinkInput" class="form-label fw-bold">Link chia sẻ:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="shareLinkInput" readonly>
+                <button class="btn btn-outline-secondary" type="button" id="copyLinkBtn">
+                  <i class="bi bi-clipboard"></i> Sao chép
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Hoặc chia sẻ qua:</label>
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-primary btn-sm" type="button" id="shareEmailBtn">
+                  <i class="bi bi-envelope"></i> Email
+                </button>
+                <button class="btn btn-outline-success btn-sm" type="button" id="shareWhatsAppBtn">
+                  <i class="bi bi-whatsapp"></i> WhatsApp
+                </button>
+                <button class="btn btn-outline-info btn-sm" type="button" id="shareZaloBtn">
+                  <i class="bi bi-chat-dots"></i> Zalo
+                </button>
+              </div>
+            </div>
+            <div class="card bg-light">
+              <div class="card-body">
+                <h6 class="card-title">
+                  <i class="bi bi-info-circle text-info"></i> Hướng dẫn:
+                </h6>
+                <ul class="mb-0 small">
+                  <li>Link này chỉ dành cho Bên B để ký hợp đồng</li>
+                  <li>Link có hiệu lực trong vòng 30 ngày</li>
+                  <li>Sau khi Bên B ký, bạn sẽ được thông báo</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal xác minh checksum & QR code -->
+    <div class="modal fade" id="verifyContractModal" tabindex="-1" aria-labelledby="verifyContractModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="verifyContractModalLabel">
+              <i class="bi bi-shield-check text-success"></i> Xác minh hợp đồng
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <div>Sử dụng Checksum để xác minh hợp đồng chưa bị chỉnh sửa.</div>
+            </div>
+            <div class="mb-3">
+              <label for="checksumDisplay" class="form-label fw-bold">Checksum SHA-256:</label>
+              <div class="input-group">
+                <input type="text" class="form-control font-monospace" id="checksumDisplay" readonly style="font-size: 11px;">
+                <button class="btn btn-outline-primary" type="button" id="copychecksumBtn">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">QR Code để xác minh:</label>
+              <div id="qrcodeContainer" class="text-center p-3 border rounded" style="background: #f8f9fa;">
+                <!-- QR code sẽ được generate vào đây -->
+              </div>
+            </div>
+            <div class="card bg-light">
+              <div class="card-body">
+                <h6 class="card-title">
+                  <i class="bi bi-shield-check"></i> Cách sử dụng:
+                </h6>
+                <ul class="mb-0 small">
+                  <li>Copy checksum để lưu trữ an toàn</li>
+                  <li>Chia sẻ QR code cùng với hợp đồng</li>
+                  <li>Quét QR hoặc paste checksum để kiểm tra không sửa đổi</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Timeline -->
+    <div class="modal fade" id="timelineModal" tabindex="-1" aria-labelledby="timelineModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="timelineModalLabel">
+              <i class="bi bi-clock-history text-primary"></i> Timeline - Lịch sử thay đổi
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="timelineContent" style="position: relative; padding-left: 30px;">
+              <div class="text-center text-muted py-3">
+                <i class="bi bi-hourglass-split"></i> Chưa có sự kiện
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="script.js" type="module"></script>
+  </body>
+</html>
+
